@@ -1,0 +1,30 @@
+name: macOS CI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up JDK 11
+      uses: actions/setup-java@v1
+      with:
+        java-version: 11.0.4
+        architecture: x64
+
+    - name: Build Dependencies (macOS)
+      run: brew install bison flex curl
+
+    - name: Fetch Dependencies
+      run: gradle --init-script gradle/support/fetchDependencies.gradle init
+
+    - name: Build with Gradle
+      run: gradle buildGhidra
+
+    - uses: actions/upload-artifact@v2
+      with:
+        name: macOS-Release
+        path: build/dist/ghidra_*_osx64.zip
