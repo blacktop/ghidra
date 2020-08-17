@@ -36,23 +36,27 @@ jobs:
       - name: Build with Gradle
         run: gradle buildGhidra
 
-      - uses: actions/upload-artifact@v2
-        if: matrix.platform == 'ubuntu-latest'
-        with:
-          name: ghidra-linux-dev
-          path: build/dist/ghidra_*_linux64.zip
+      # - uses: actions/upload-artifact@v2
+      #   if: matrix.platform == 'ubuntu-latest'
+      #   with:
+      #     name: ghidra-linux-dev
+      #     path: build/dist/ghidra_*_linux64.zip
 
-      - uses: actions/upload-artifact@v2          
-        if: matrix.platform == 'windows-2016'
-        with:
-          name: ghidra-windows-dev
-          path: build/dist/ghidra_*_win64.zip
+      # - uses: actions/upload-artifact@v2          
+      #   if: matrix.platform == 'windows-2016'
+      #   with:
+      #     name: ghidra-windows-dev
+      #     path: build/dist/ghidra_*_win64.zip
 
-      - uses: actions/upload-artifact@v2          
-        if: matrix.platform == 'macos-latest'
-        with:
-          name: ghidra-macos-dev
-          path: build/dist/ghidra_*_osx64.zip
+      # - uses: actions/upload-artifact@v2          
+      #   if: matrix.platform == 'macos-latest'
+      #   with:
+      #     name: ghidra-macos-dev
+      #     path: build/dist/ghidra_*_osx64.zip
+
+      - id: get-sha
+        run: |
+          echo ::set-output name=sha::$(echo $GITHUB_SHA | cut -c1-8)
 
       - name: Create Release
         id: create_release
@@ -60,11 +64,18 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
+          tag_name: ${{ steps.get-sha.outputs.sha }}
+          release_name: Nightly ${{ steps.get-sha.outputs.sha }}
           draft: false
-          prerelease: false
+          prerelease: true
 
+      - name: Get Name of Artifacts
+        run: |
+          LINUX_PATHNAME=$(ls build/dist/ghidra_*_linux64.zip | head -n 1)
+          LINUX_NAME=$(basename $ARTIFACT_PATHNAME)
+          echo ::set-env name=ARTIFACT_NAME::${ARTIFACT_NAME}
+          echo ::set-env name=ARTIFACT_PATHNAME::${ARTIFACT_PATHNAME}
+            
       - name: Upload Release Asset
         id: upload-release-asset 
         uses: actions/upload-release-asset@v1
@@ -72,6 +83,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-          asset_path: build/dist/*.zip
-          asset_name: ghidra_${{ github.ref }}_osx64.zip
+          asset_path: ${{ env.LINUX_PATHNAME }}
+          asset_name: ${{ env.LINUX_NAME }}
           asset_content_type: application/zip
