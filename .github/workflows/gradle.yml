@@ -71,11 +71,10 @@ jobs:
 
       - name: Get Name of Artifacts
         run: |
-          ls build/dist/ghidra_*_linux64.zip | head -n 1
           LINUX_PATHNAME=$(ls build/dist/ghidra_*_linux64.zip | head -n 1)
-          LINUX_NAME=$(basename $ARTIFACT_PATHNAME)
-          echo ::set-env name=ARTIFACT_NAME::${ARTIFACT_NAME}
-          echo ::set-env name=ARTIFACT_PATHNAME::${ARTIFACT_PATHNAME}
+          LINUX_NAME=$(basename $LINUX_PATHNAME)
+          echo ::set-env name=LINUX_NAME::${LINUX_NAME}
+          echo ::set-env name=LINUX_PATHNAME::${LINUX_PATHNAME}
             
       - name: Upload Release Asset
         id: upload-release-asset 
