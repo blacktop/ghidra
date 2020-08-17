@@ -71,6 +71,7 @@ jobs:
 
       - name: Get Name of Artifacts
         run: |
+          ls build/dist/ghidra_*_linux64.zip | head -n 1
           LINUX_PATHNAME=$(ls build/dist/ghidra_*_linux64.zip | head -n 1)
           LINUX_NAME=$(basename $ARTIFACT_PATHNAME)
           echo ::set-env name=ARTIFACT_NAME::${ARTIFACT_NAME}
